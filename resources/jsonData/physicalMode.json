@@ -1,0 +1,24 @@
+{
+  "physical_modes": [
+    {
+      "id": "physical_mode:Metro",
+      "name": "Métro",
+      "resource": "Rez.Drawables.Metro"
+    },
+    {
+      "id": "physical_mode:Tramway",
+      "name": "Tramway",
+      "resource": "Rez.Drawables.Tramway"
+    },
+    {
+      "id": "physical_mode:LocalTrain",
+      "name": "Transilien",
+      "resource": "Rez.Drawables.Train"
+    },
+    {
+      "id": "physical_mode:RapidTransit",
+      "name": "RER",
+      "resource": "Rez.Drawables.Train"
+    }
+  ]
+}

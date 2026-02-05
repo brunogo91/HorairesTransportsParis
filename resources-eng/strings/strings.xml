@@ -1,0 +1,22 @@
+<strings>
+    <string id="AppName">Paris transport schedules</string>
+    <string id="schedules" scope="glance">Schedules</string>
+    <string id="connectPhone">Phone not connected</string>
+    <string id="loading">Loading...</string>
+    <string id="errorNoDirectionMessage">Unable to retrieve directions.</string>
+    <string id="errorNoStationMessage">Unable to retrieve stations.</string>
+    <string id="errorTimeout">Timeout.. Please retry</string>
+    <string id="cancelled">CANCELLED</string>
+    <string id="noMoreTrain">No more train at \n</string>
+    <string id="errorDeletingStation">Error deleting station</string>
+
+    <string id="addStation">Add station</string>
+    <string id="removeStation">Delete stations</string>
+    <string id="addedStation">Station added</string>
+    <string id="stations">Stations</string>
+    <string id="modeMenuTitle">Transport mode</string>
+    <string id="lineMenuTitle">Line</string>
+    <string id="stationMenuTitle">Station</string>
+    <string id="destinationMenuTitle">Destination</string>
+    <string id="directionMenuTitle">Direction</string>
+</strings>

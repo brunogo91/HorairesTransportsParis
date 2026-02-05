@@ -1,0 +1,11 @@
+<drawables>
+    <!-- <bitmap id="Bus" filename="Bus.svg" >
+        <palette disableTransparency="false">
+            <color>FFFFFF</color>
+        </palette>
+    </bitmap> -->
+    <!-- <bitmap id="Funicular" filename="Funicular.svg" /> -->
+    <bitmap id="Metro" filename="Metro.svg" />
+    <bitmap id="Train" filename="Train.svg" />
+    <bitmap id="Tramway" filename="Tramway.svg" />
+</drawables>

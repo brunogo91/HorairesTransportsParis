@@ -1,0 +1,1 @@
+typedef SchedulesResult as SchedulesResultData or GatewayResultKO;

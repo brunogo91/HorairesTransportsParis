@@ -1,0 +1,5 @@
+<resources>
+    <layout id="Connect">
+        <text-area id="Title" text="@Strings.connectPhone" x="0" y="center" width="100%" height="100%" justification="Graphics.TEXT_JUSTIFY_CENTER|Graphics.TEXT_JUSTIFY_VCENTER" />
+    </layout>
+</resources>

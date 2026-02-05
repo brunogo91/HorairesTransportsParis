@@ -1,0 +1,22 @@
+<strings>
+    <string id="AppName">Horaires transport Paris</string>
+    <string id="schedules" scope="glance">Horaires</string>
+    <string id="connectPhone">Téléphone non connecté</string>
+    <string id="loading">Chargement...</string>
+    <string id="errorNoDirectionMessage">Impossible de récupérer les directions.</string>
+    <string id="errorNoStationMessage">Impossible de récupérer les stations.</string>
+    <string id="errorTimeout">Timeout.. Merci de réessayer</string>
+    <string id="cancelled">ANNULÉ</string>
+    <string id="noMoreTrain">Plus de train à \n</string>
+    <string id="errorDeletingStation">Erreur à la suppression de la station</string>
+
+    <string id="addStation">Ajouter une station</string>
+    <string id="removeStation">Supprimer des stations</string>
+    <string id="addedStation">Station ajoutée</string>
+    <string id="stations">Stations</string>
+    <string id="modeMenuTitle">Mode de transport</string>
+    <string id="lineMenuTitle">Ligne</string>
+    <string id="stationMenuTitle">Station</string>
+    <string id="destinationMenuTitle">Destination</string>
+    <string id="directionMenuTitle">Direction</string>
+</strings>

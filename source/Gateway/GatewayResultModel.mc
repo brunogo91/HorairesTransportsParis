@@ -1,0 +1,1 @@
+typedef GatewayResult as GatewayResultKO or GatewayResultData;

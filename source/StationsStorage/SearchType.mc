@@ -1,0 +1,4 @@
+enum SearchType {
+    DESTINATION = "DESTINATION",
+    DIRECTION = "DIRECTION",
+}
