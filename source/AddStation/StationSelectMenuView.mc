@@ -5,27 +5,28 @@ import Toybox.Application.Storage;
 
 class StationSelectionSelectMenuInputDelegate extends WatchUi.Menu2InputDelegate {
     protected var _stationSelection as StationSelection;
-    protected var _onUpdate as Method(lineResult as StationResult) as Void;
-    protected var _stationGateway as StationGateway;
+    protected var _stationGateway as StationSelectionGateway;
     protected var _progressBar as ProgressBar;
 
-    function initialize(stationSelection as StationSelection, onUpdate as Method(lineResult as StationResult) as Void) {
+    function initialize(stationSelection as StationSelection) {
         Menu2InputDelegate.initialize();
         _stationSelection = stationSelection;
-        _onUpdate = onUpdate;
-        _stationGateway = new StationGateway(stationSelection, _onUpdate);
+        _stationGateway = new StationSelectionGateway();
         _progressBar = new WatchUi.ProgressBar((Application.loadResource(Rez.Strings.loading)) as String, null);
     }
 }
 class StationModeSelectMenuInputDelegate extends StationSelectionSelectMenuInputDelegate {
-    function initialize(stationSelection as StationSelection, onUpdate as Method(lineResult as StationResult) as Void) {
-        StationSelectionSelectMenuInputDelegate.initialize(stationSelection, onUpdate);
+    private var _onUpdate as Method(lineResult as LineResult) as Void;
+
+    function initialize(stationSelection as StationSelection, onUpdate as Method(lineResult as LineResult) as Void) {
+        StationSelectionSelectMenuInputDelegate.initialize(stationSelection);
+        _onUpdate = onUpdate;
     }
 
     function onSelect(item as MenuItem) as Void {
         WatchUi.pushView(_progressBar, null, WatchUi.SLIDE_LEFT);
         _stationSelection.setMode(item.getId() as String);
-        _stationGateway.lineAndStationResquest();
+        _stationGateway.makeStationRequest(LINES_SEARCH, _stationSelection, new LineResultHandler(_onUpdate));
     }
 
     function onBack() {
@@ -34,15 +35,18 @@ class StationModeSelectMenuInputDelegate extends StationSelectionSelectMenuInput
     }
 }
 class StationLineSelectMenuInputDelegate extends StationSelectionSelectMenuInputDelegate {
-    function initialize(stationSelection as StationSelection, onUpdate as Method(lineResult as StationResult) as Void) {
-        StationSelectionSelectMenuInputDelegate.initialize(stationSelection, onUpdate);
+    private var _onUpdate as Method(idNameResult as IdNameResult) as Void;
+
+    function initialize(stationSelection as StationSelection, onUpdate as Method(idNameResult as IdNameResult) as Void) {
+        StationSelectionSelectMenuInputDelegate.initialize(stationSelection);
+        _onUpdate = onUpdate;
     }
 
     function onSelect(item as MenuItem) as Void {
         WatchUi.pushView(_progressBar, null, WatchUi.SLIDE_LEFT);
         _stationSelection.setLineId(item.getId() as String);
         _stationSelection.setLineName(item.getLabel());
-        _stationGateway.lineAndStationResquest();
+        _stationGateway.makeStationRequest(STATIONS_SEARCH, _stationSelection, new IdNameResultHandler(_onUpdate));
     }
 
     function onBack() {
@@ -52,8 +56,14 @@ class StationLineSelectMenuInputDelegate extends StationSelectionSelectMenuInput
     }
 }
 class StationStationSelectMenuInputDelegate extends StationSelectionSelectMenuInputDelegate {
-    function initialize(stationSelection as StationSelection, onUpdate as Method(lineResult as StationResult) as Void) {
-        StationSelectionSelectMenuInputDelegate.initialize(stationSelection, onUpdate);
+    private var _onUpdate as (Method(idNameResult as IdNameResult) as Void) or (Method(directionResult as DirectionResult) as Void);
+
+    function initialize(
+        stationSelection as StationSelection,
+        onUpdate as (Method(idNameResult as IdNameResult) as Void) or (Method(directionResult as DirectionResult) as Void)
+    ) {
+        StationSelectionSelectMenuInputDelegate.initialize(stationSelection);
+        _onUpdate = onUpdate;
     }
 
     function onSelect(item as MenuItem) as Void {
@@ -62,9 +72,9 @@ class StationStationSelectMenuInputDelegate extends StationSelectionSelectMenuIn
         _stationSelection.setStationName(item.getLabel());
 
         if (StationSelectMenuView.isDestinationMode(_stationSelection.mode)) {
-            _stationGateway.routeStationRequest();
+            _stationGateway.makeStationRequest(DESTINATIONS_SEARCH, _stationSelection, new IdNameResultHandler(_onUpdate));
         } else {
-            _stationGateway.directionResquest();
+            _stationGateway.makeStationRequest(DIRECTIONS_SEARCH, _stationSelection, new DirectionResultHandler(_onUpdate));
         }
     }
 
@@ -117,7 +127,7 @@ class StationSelectMenuView extends WatchUi.View {
         // "physical_mode:Bus" => Rez.Drawables.Bus,
         // "physical_mode:Funicular" => Rez.Drawables.Funicular,
         "physical_mode:Metro" => Rez.Drawables.Metro,
-        "physical_mode:Train" => Rez.Drawables.Train,
+        // "physical_mode:Train" => Rez.Drawables.Train,
         "physical_mode:RapidTransit" => Rez.Drawables.Train,
         "physical_mode:LocalTrain" => Rez.Drawables.Train,
         "physical_mode:Tramway" => Rez.Drawables.Tramway,
@@ -153,18 +163,19 @@ class StationSelectMenuView extends WatchUi.View {
         );
     }
 
-    function chooseLine(lineResult as StationResult) as Void {
+    function chooseLine(lineResult as LineResult) as Void {
         WatchUi.popView(WatchUi.SLIDE_RIGHT); // Pop progressBar
         if (lineResult instanceof GatewayResultKO) {
             WatchUi.showToast(lineResult.message, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
 
-
+        var pictoIconBuilder = new PictoIconFactory().pictoFromMode(_stationSelection.mode);
         var menu = new Menu2({ :title => Rez.Strings.lineMenuTitle });
-        for (var i = 0; i < lineResult.result.size(); i++) {
-            var line = lineResult.result[i].name;
-            menu.addItem(new MenuItem(line, null, lineResult.result[i].id, null));
+        for (var i = 0; i < lineResult.size(); i++) {
+            var line = lineResult[i];
+            var picto = pictoIconBuilder.build(line.name, line.pictoColor, line.pictoTextColor);
+            menu.addItem(new IconMenuItem("", null, line.id, picto, null));
         }
         WatchUi.pushView(
             menu,
@@ -173,22 +184,22 @@ class StationSelectMenuView extends WatchUi.View {
         );
     }
 
-    function chooseStation(stationResult as StationResult) as Void {
+    function chooseStation(idNameResult as IdNameResult) as Void {
         WatchUi.popView(WatchUi.SLIDE_RIGHT); // Pop progressBar
-        if (stationResult instanceof GatewayResultKO) {
-            WatchUi.showToast(stationResult.message, { :icon => Rez.Drawables.warningToastIcon });
+        if (idNameResult instanceof GatewayResultKO) {
+            WatchUi.showToast(idNameResult.message, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
-        if (stationResult.result.size() == 0) {
+        
+        if (idNameResult.size() == 0) {
             WatchUi.showToast(Rez.Strings.errorNoStationMessage, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
 
-
         var menu = new Menu2({ :title => Rez.Strings.stationMenuTitle });
-        for (var i = 0; i < stationResult.result.size(); i++) {
-            var line = stationResult.result[i].name;
-            menu.addItem(new MenuItem(line, null, stationResult.result[i].id, null));
+        for (var i = 0; i < idNameResult.size(); i++) {
+            var line = idNameResult[i].name;
+            menu.addItem(new MenuItem(line, null, idNameResult[i].id, null));
         }
         var callback = isDestinationMode(_stationSelection.mode)
             ? self.method(:chooseDestination)
@@ -200,22 +211,22 @@ class StationSelectMenuView extends WatchUi.View {
         );
     }
 
-    function chooseDirection(directionResult as StationResult) as Void {
+    function chooseDirection(directionResult as DirectionResult) as Void {
         WatchUi.popView(WatchUi.SLIDE_RIGHT); // Pop progressBar
         if (directionResult instanceof GatewayResultKO) {
             WatchUi.showToast(directionResult.message, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
-        if (directionResult.result.size() == 0) {
+        if (directionResult.size() == 0) {
             WatchUi.showToast(Rez.Strings.errorNoDirectionMessage, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
 
 
         var menu = new Menu2({ :title => Rez.Strings.directionMenuTitle });
-        for (var i = 0; i < directionResult.result.size(); i++) {
-            var direction = directionResult.result[i] as DestinationResult;
-            menu.addItem(new MenuItem(direction["destinationName"], null, direction["stationStopPointIds"], null)); // supposed to be id and name...
+        for (var i = 0; i < directionResult.size(); i++) {
+            var direction = directionResult[i];
+            menu.addItem(new MenuItem(direction.destinationName, null, direction.stationStopPointIds, null));
         }
         WatchUi.pushView(
             menu,
@@ -224,21 +235,21 @@ class StationSelectMenuView extends WatchUi.View {
         );
     }
 
-    function chooseDestination(destinationResult as StationResult) as Void {
+    function chooseDestination(destinationResult as IdNameResult) as Void {
         WatchUi.popView(WatchUi.SLIDE_RIGHT); // Pop progressBar
         if (destinationResult instanceof GatewayResultKO) {
             WatchUi.showToast(destinationResult.message, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
-        if (destinationResult.result.size() == 0) {
+        if (destinationResult.size() == 0) {
             WatchUi.showToast(Rez.Strings.errorNoStationMessage, { :icon => Rez.Drawables.warningToastIcon });
             return;
         }
 
 
         var menu = new Menu2({ :title => Rez.Strings.destinationMenuTitle });
-        for (var i = 0; i < destinationResult.result.size(); i++) {
-            var station = destinationResult.result[i] as Element;
+        for (var i = 0; i < destinationResult.size(); i++) {
+            var station = destinationResult[i];
             if (!station.id.equals(_stationSelection.stationStopAreaId)) {
                 menu.addItem(new MenuItem(station.name, null, station.id, null));
             }

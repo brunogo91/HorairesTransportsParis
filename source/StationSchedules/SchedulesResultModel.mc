@@ -1,1 +1,3 @@
-typedef SchedulesResult as SchedulesResultData or GatewayResultKO;
+import Toybox.Lang;
+
+typedef SchedulesResult as Array<Schedule> or GatewayResultKO;

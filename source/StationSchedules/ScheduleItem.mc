@@ -45,7 +45,7 @@ class ScheduleItem extends WatchUi.CustomMenuItem {
             textColor = Graphics.COLOR_GREEN;
         } else if (isBeforeNow || _schedule.isCancelled()) {
             textColor = Graphics.COLOR_RED;
-        } else if (_schedule.isDelayed()) {// TODO DELAYED
+        } else if (_schedule.isDelayed()) { // TODO DELAYED
             textColor = Graphics.COLOR_PINK;
         }
 

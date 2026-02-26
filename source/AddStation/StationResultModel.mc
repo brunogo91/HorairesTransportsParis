@@ -1,1 +1,0 @@
-typedef StationResult as StationData or GatewayResultKO;

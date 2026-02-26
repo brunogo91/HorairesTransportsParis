@@ -1,6 +1,6 @@
 import Toybox.Lang;
 
-class Element {
+class IdNameModel {
     var id as String;
     var name as String;
 
@@ -10,6 +10,6 @@ class Element {
     }
 
     function toString() {
-        return "Element {id => " + id + ", name => " + name + "}";
+        return "IdNameModel {id => " + id + ", name => " + name + "}";
     }
 }

@@ -54,7 +54,7 @@ class SchedulesView extends WatchUi.View {
         // _updateTimer.start(method(:reloadSchedules), 20000, true);
     }
 
-    function updateSchedules(schedulesResult as SchedulesResultData) as Void {
+    function updateSchedules(schedulesResult as SchedulesResult) as Void {
         if (_viewState == EXITED) {
             return;
         }
@@ -105,17 +105,17 @@ class SchedulesView extends WatchUi.View {
 
         dc.clear();
         // View.onUpdate(dc);
-        if (_schedulesResult.schedules.size() > 0) {
-            makeCustomMenu(dc);
+        if (_schedulesResult != null && _schedulesResult.size() > 0) {
+            makeCustomMenu(dc, _schedulesResult);
         } else {
             displayNoMoreTrain(dc);
         }
     }
 
-    function makeCustomMenu(dc as Dc) as Void {
+    function makeCustomMenu(dc as Dc, schedules as Array<Schedule>) as Void {
         var customMenu = new SchedulesMenu(_selectedItem.stationName);
-        for (var i = 0; i < _schedulesResult.schedules.size(); i++) {
-            var schedule = _schedulesResult.schedules[i] as Schedule;
+        for (var i = 0; i < schedules.size(); i++) {
+            var schedule = schedules[i] as Schedule;
             var item = new ScheduleItem(schedule.departureTime.value(), schedule);
             customMenu.addItem(item);
         }

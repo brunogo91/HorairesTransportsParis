@@ -1,6 +1,6 @@
 import Toybox.Lang;
 
-class DestinationResult {
+class DirectionModel {
     var destinationName as String;
     var destinations as Array<String>;
     var stationStopPointIds as Array<String>;
@@ -12,6 +12,6 @@ class DestinationResult {
     }
 
     function toString() {
-        return "DestinationResult {destinationName => " + destinationName + ", destinations => " + destinations + ", stationStopPointIds => " + stationStopPointIds + "}";
+        return "DirectionModel {destinationName => " + destinationName + ", destinations => " + destinations + ", stationStopPointIds => " + stationStopPointIds + "}";
     }
 }
